@@ -1,0 +1,156 @@
+swagger: "2.0"
+info:
+  description: "API to manage orders and it's state"
+  version: "1.0.0"
+  title: "Order API"
+  contact:
+    name: "Fernando Zendron"
+    email: "fearzendron@gmail.com"
+host: "localhost:8000"
+basePath: "/v1"
+tags:
+- name: "order"
+  description: "Order API"
+schemes:
+- "https"
+
+paths:
+  /orders:
+    get:
+      tags:
+      - "order"
+      summary: "Get all orders by it's state"
+      description:
+        This resources get all register from database, you can get by it's status, like opened, pre-aproved, payment pending, product pending, approved, closed.
+      operationId: "getAllOrders"
+      produces:
+      - "application/json"
+      parameters:
+        - $ref: '#/parameters/limit'
+        - $ref: '#/parameters/offset'
+        - $ref: '#/parameters/sort'
+      responses:
+        200:
+          description: "successful operation"
+          schema:
+            type: "array"
+            items:
+              $ref: "#/definitions/Order"
+        500:
+          description: "Internal server error"
+  
+
+responses:
+  201:
+    description: "Created"
+    headers:
+      Location:
+        description: new record uri
+        type: string
+  404:
+    description: "Resource not found"
+    schema:
+      $ref: "#/definitions/Error"
+  400:
+    description: "Bad request"
+    schema:
+      $ref: "#/definitions/Error"
+  405:
+    description: "Method not allowed"
+    schema:
+      $ref: "#/definitions/Error"
+  500:
+    description: "Internal server error"
+    schema:
+      $ref: "#/definitions/Error"
+        
+parameters:
+  limit:
+    name: "limit"
+    in: "query"
+    description: "The number of records to fetch. Limit the number of elements on the response"
+    required: false
+    type: "integer"
+    default: 24
+  offset:
+    name: "offset"
+    in: "query"
+    description: "The starting record to fetch. Skip over a number of elements by specifying an offset value"
+    required: false
+    type: "integer"
+    default: 0
+  sort:
+    name: "sort"
+    in: "query"
+    description: "Sort the records by something field. By default it is will be sort ascending, for sort descending is necessary pass “-” at the beginning of the word"
+    required: false
+    type: "integer"
+  id:
+    name: "id"
+    in: "path"
+    description: "ID of resource"
+    required: true
+    type: "integer"
+    format: "int64"
+    
+definitions:
+  ValidationError:
+    type: "object"
+    required:
+    - "code"
+    - "field"
+    - "message"
+    properties:
+      code:
+        type: "integer"
+        example: 1
+      field:
+        type: "string"
+        example: "Something bad happened"
+      message:
+        type: "string"
+        example: "More details about the error here"
+  Error:
+    type: "object"
+    required:
+    - "code"
+    - "message"
+    properties:
+      code:
+        type: "integer"
+        example: 1
+      message:
+        type: "string"
+        example: "Something bad happened"
+      errors:
+        type: "array"
+        items: 
+          $ref: "#/definitions/ValidationError"
+
+  Order:
+    type: "object"
+    required:
+    - "id"
+    - "dateCreated"
+    - "status"
+    properties:
+      id:
+        type: integer
+        example: 000000001
+      dateCreated:
+        type: "string"
+        format: "date-time"
+        example: "2018-04-22T17:32:28Z"
+        description: "Use the RFC 3339 as a pattern format"
+      status:
+        type: "string"
+        enum: ["opened", "pending", "approved", "repproved"]
+        example: "pending"
+      lastModification:
+        type: "string"
+        format: "date-time"
+        example: "2018-04-22T17:32:28Z"
+        description: "Use the RFC 3339 as a pattern format"
+      item:
+        type: "string"
+        example: "Pend 2 units"
